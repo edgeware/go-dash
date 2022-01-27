@@ -41,14 +41,17 @@ const ACCESSIBILITY_ELEMENT_SCHEME_DESCRIPTIVE_AUDIO AccessibilityElementScheme 
 
 // Constants for some known MIME types, this is a limited list and others can be used.
 const (
-	DASH_MIME_TYPE_VIDEO_MP4     string = "video/mp4"
-	DASH_MIME_TYPE_AUDIO_MP4     string = "audio/mp4"
-	DASH_MIME_TYPE_SUBTITLE_VTT  string = "text/vtt"
-	DASH_MIME_TYPE_SUBTITLE_TTML string = "application/ttaf+xml"
-	DASH_MIME_TYPE_SUBTITLE_SRT  string = "application/x-subrip"
-	DASH_MIME_TYPE_SUBTITLE_DFXP string = "application/ttaf+xml"
-	DASH_MIME_TYPE_IMAGE_JPEG    string = "image/jpeg"
-	DASH_CONTENT_TYPE_IMAGE      string = "image"
+	DASH_MIME_TYPE_VIDEO_MP4           string = "video/mp4"
+	DASH_MIME_TYPE_AUDIO_MP4           string = "audio/mp4"
+	DASH_MIME_TYPE_APPLICATION_MP4     string = "application/mp4"
+	DASH_MIME_TYPE_SUBTITLE_VTT        string = "text/vtt"
+	DASH_MIME_TYPE_SUBTITLE_TTML       string = "application/ttaf+xml"
+	DASH_MIME_TYPE_SUBTITLE_SRT        string = "application/x-subrip"
+	DASH_MIME_TYPE_SUBTITLE_DFXP       string = "application/ttaf+xml"
+	DASH_MIME_TYPE_SUBTITLE_WVTT       string = "application/mp4;codecs=wvtt"
+	DASH_MIME_TYPE_SUBTITLE_IMSC1_TEXT string = "application/mp4;codecs=stpp.ttml.im1t"
+	DASH_MIME_TYPE_IMAGE_JPEG          string = "image/jpeg"
+	DASH_CONTENT_TYPE_IMAGE            string = "image"
 )
 
 // Known error variables
@@ -638,6 +641,13 @@ func (m *MPD) AddNewAdaptationSetSubtitle(mimeType string, lang string) (*Adapta
 // Create a new Adaptation Set for Subtitle Assets.
 // mimeType - MIME Type (i.e. text/vtt).
 // lang - Language (i.e. en).
+func (m *MPD) AddNewAdaptationSetSubtitleWithCodecs(mimeType, codecs, lang string) (*AdaptationSet, error) {
+	return m.period.AddNewAdaptationSetSubtitleWithCodecs(mimeType, codecs, lang)
+}
+
+// Create a new Adaptation Set for Subtitle Assets.
+// mimeType - MIME Type (i.e. text/vtt).
+// lang - Language (i.e. en).
 func (m *MPD) AddNewAdaptationSetSubtitleWithID(id string, mimeType string, lang string) (*AdaptationSet, error) {
 	return m.period.AddNewAdaptationSetSubtitleWithID(id, mimeType, lang)
 }
@@ -650,6 +660,24 @@ func (period *Period) AddNewAdaptationSetSubtitle(mimeType string, lang string) 
 		Lang: Strptr(lang),
 		CommonAttributesAndElements: CommonAttributesAndElements{
 			MimeType: Strptr(mimeType),
+		},
+	}
+	err := period.addAdaptationSet(as)
+	if err != nil {
+		return nil, err
+	}
+	return as, nil
+}
+
+// Create a new Adaptation Set for Subtitle Assets.
+// mimeType - MIME Type (i.e. text/vtt).
+// lang - Language (i.e. en).
+func (period *Period) AddNewAdaptationSetSubtitleWithCodecs(mimeType, codecs, lang string) (*AdaptationSet, error) {
+	as := &AdaptationSet{
+		Lang: Strptr(lang),
+		CommonAttributesAndElements: CommonAttributesAndElements{
+			MimeType: Strptr(mimeType),
+			Codecs:   Strptr(codecs),
 		},
 	}
 	err := period.addAdaptationSet(as)
